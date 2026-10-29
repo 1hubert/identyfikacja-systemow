@@ -1,4 +1,4 @@
-% load("StochasticProcess.mat")
+load("StochasticProcess.mat")
 
 M = 1001;
 N = 500;

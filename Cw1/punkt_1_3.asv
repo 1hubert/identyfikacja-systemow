@@ -1,0 +1,63 @@
+sigma = 0.64; % lub sigma = 1;
+Tp = 0.001;
+N = 2000;
+H = tf([0.1], [1 -0.9], Tp);
+tn = Tp:Tp:N .* Tp;
+
+e = sigma .* randn(1, N) .* ones(1, N);
+x = sin(2 * pi * 5 * tn);
+y = sin(2 * pi * 5 * tn) + e;
+v = lsim(H, e, tn);
+
+% Plotting
+figure;
+plot(tn, e);
+title("e");
+
+figure;
+plot(tn, x);
+title("x");
+
+figure;
+plot(tn, y);
+title("y");
+
+figure;
+plot(tn, v);
+title("v");
+
+% wartości estymatora funkcji autokorelacji
+% dla tau \in [0; N-1]
+
+% Wyznaczenie estymatorów funkcji autokorelacji (wersja obciążona, czynnik 1/N)
+% Funkcja xcorr domyślnie wykorzystuje własność symetrii W1 i zwraca 
+% wartości dla przesunięć tau \in [-(N-1); N-1].
+[r_ee, tau] = xcorr(e, 'biased');
+[r_xx, ~]   = xcorr(x, 'biased');
+[r_yy, ~]   = xcorr(y, 'biased');
+[r_vv, ~]   = xcorr(v, 'biased');
+
+% Wykresy autokorelacji dla wszystkich sygnałów
+figure;
+subplot(4,1,1); plot(tau, r_ee); title('Autokorelacja e (szum biały)'); grid on;
+subplot(4,1,2); plot(tau, r_xx); title('Autokorelacja x (sygnał deterministyczny)'); grid on;
+subplot(4,1,3); plot(tau, r_yy); title('Autokorelacja y (sygnał + szum)'); grid on;
+subplot(4,1,4); plot(tau, r_vv); title('Autokorelacja v (szum kolorowy)'); grid on;
+
+% --- Sprawdzenie różnic dla estymatora obciążonego i asymptotycznie nieobciążonego ---
+% Obliczenie wersji nieobciążonej z czynnikiem 1/(N - |\tau|)
+[r_ee_unbiased, ~] = xcorr(e, 'unbiased');
+
+figure;
+plot(tau, r_ee, 'b');
+title('Autokorelacja szumu e(n): obciążona vs asymptotycznie nieobciążona');
+legend('Obciążony (1/N)', 'Asymp. nieobciążony (1/(N-|\tau|))');
+grid on;
+
+% --- Estymator funkcji korelacji wzajemnej sygnałów y oraz x ---
+[r_yx, tau_cross] = xcorr(y, x, 'biased');
+
+figure;
+plot(tau_cross, r_yx);
+title('Funkcja korelacji wzajemnej sygnałów y oraz x');
+grid on;
