@@ -77,5 +77,3 @@ plot(t_imp_2, y_imp_2);
 hold off;
 title('noisy S')
 
-% punkt 2
-
